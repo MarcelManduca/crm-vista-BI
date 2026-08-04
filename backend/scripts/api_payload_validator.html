@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Gralha - API Payload Validator v1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select,
+        textarea {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .results-panel {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .result-item.error {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+
+        .result-item.warning {
+            border-left-color: #ed8936;
+            background: #fffaf0;
+        }
+
+        .result-item.success {
+            border-left-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            color: #666;
+            word-break: break-all;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .validation-message {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .validation-message.error {
+            background: #fff5f5;
+            color: #c53030;
+            border-left: 3px solid #f56565;
+        }
+
+        .validation-message.success {
+            background: #f0fff4;
+            color: #22543d;
+            border-left: 3px solid #48bb78;
+        }
+
+        .validation-message.warning {
+            background: #fffaf0;
+            color: #7c2d12;
+            border-left: 3px solid #ed8936;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Dashboard Gralha - API Payload Validator v1</h1>
+            <p>Teste, valide e homogenize dados vindos da API Vista CRM</p>
+        </div>
+
+        <div class="content">
+            <!-- Left Panel: Input -->
+            <div class="panel">
+                <div class="panel-title">📥 Entrada de Dados</div>
+
+                <div class="input-group">
+                    <label>Tipo de Recurso</label>
+                    <select id="resourceType" onchange="updateTemplate()">
+                        <option value="clients">Clientes</option>
+                        <option value="properties">Imóveis</option>
+                        <option value="deals">Negócios</option>
+                        <option value="users">Usuários</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Período - Data Inicial</label>
+                    <input type="date" id="startDate">
+                </div>
+
+                <div class="input-group">
+                    <label>Período - Data Final</label>
+                    <input type="date" id="endDate">
+                </div>
+
+                <div class="input-group">
+                    <label>Payload JSON (Cole aqui os dados da API Vista)</label>
+                    <textarea id="payloadInput" placeholder='[{"id": 1, "name": "Cliente Teste", ...}]'></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="loadTemplate()">📋 Carregar Template</button>
+                    <button class="btn-secondary" onclick="clearInput()">🗑️ Limpar</button>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-success" onclick="validatePayload()">✅ Validar</button>
+                    <button class="btn-primary" onclick="analyzeData()">🔍 Analisar</button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Results -->
+            <div class="panel">
+                <div class="panel-title">📊 Resultados & Análise</div>
+
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('stats')">Estatísticas</button>
+                    <button class="tab" onclick="switchTab('validation')">Validação</button>
+                    <button class="tab" onclick="switchTab('homogenization')">Homogenização</button>
+                    <button class="tab" onclick="switchTab('export')">Exportar</button>
+                </div>
+
+                <!-- Stats Tab -->
+                <div id="stats" class="tab-content active">
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalRecords">0</div>
+                            <div class="stat-label">Total de Registros</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="validRecords">0</div>
+                            <div class="stat-label">Válidos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="invalidRecords">0</div>
+                            <div class="stat-label">Inválidos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="warningRecords">0</div>
+                            <div class="stat-label">Avisos</div>
+                        </div>
+                    </div>
+                    <div class="results-panel" id="statsResults"></div>
+                </div>
+
+                <!-- Validation Tab -->
+                <div id="validation" class="tab-content">
+                    <div class="results-panel" id="validationResults"></div>
+                </div>
+
+                <!-- Homogenization Tab -->
+                <div id="homogenization" class="tab-content">
+                    <div class="results-panel" id="homogenizationResults"></div>
+                </div>
+
+                <!-- Export Tab -->
+                <div id="export" class="tab-content">
+                    <div class="input-group">
+                        <label>Dados Homogenizados (JSON)</label>
+                        <textarea id="exportOutput" readonly style="min-height: 300px;"></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="downloadJSON()">📥 Download JSON</button>
+                        <button class="btn-secondary" onclick="copyToClipboard()">📋 Copiar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Dashboard Gralha v1.0 | API Payload Validator | Teste de Homogenização de Dados</p>
+        </div>
+    </div>
+
+    <script>
+        // Templates de exemplo
+        const templates = {
+            clients: [
+                {
+                    id: "cli_001",
+                    name: "João Silva",
+                    email: "joao@example.com",
+                    phone: "11999999999",
+                    origin: "Google Ads",
+                    created_at: "2026-08-01T10:00:00Z"
+                },
+                {
+                    id: "cli_002",
+                    name: "Maria Santos",
+                    email: "maria@example.com",
+                    phone: "11988888888",
+                    origin: "Zap Imóveis",
+                    created_at: "2026-08-02T14:30:00Z"
+                }
+            ],
+            properties: [
+                {
+                    id: "prop_001",
+                    address: "Rua Teste, 123",
+                    city: "São Paulo",
+                    state: "SP",
+                    type: "Apartamento",
+                    area: 100,
+                    bedrooms: 2,
+                    bathrooms: 1,
+                    price: 500000,
+                    created_at: "2026-08-01T10:00:00Z"
+                },
+                {
+                    id: "prop_002",
+                    address: "Av. Paulista, 1000",
+                    city: "São Paulo",
+                    state: "SP",
+                    type: "Casa",
+                    area: 250,
+                    bedrooms: 4,
+                    bathrooms: 3,
+                    price: 1200000,
+                    created_at: "2026-08-02T14:30:00Z"
+                }
+            ],
+            deals: [
+                {
+                    id: "deal_001",
+                    client_id: "cli_001",
+                    property_id: "prop_001",
+                    user_id: "user_001",
+                    status: "Contrato Assinado",
+                    value: 500000,
+                    commission: 30000,
+                    date_signed: "2026-08-05",
+                    created_at: "2026-08-01T10:00:00Z"
+                },
+                {
+                    id: "deal_002",
+                    client_id: "cli_002",
+                    property_id: "prop_002",
+                    user_id: "user_002",
+                    status: "Em Negociação",
+                    value: 1200000,
+                    commission: null,
+                    date_signed: null,
+                    created_at: "2026-08-02T14:30:00Z"
+                }
+            ],
+            users: [
+                {
+                    id: "user_001",
+                    username: "joao.corretor",
+                    email: "joao.corretor@gralha.dev",
+                    full_name: "João Corretor",
+                    role: "broker",
+                    created_at: "2026-01-01T10:00:00Z"
+                },
+                {
+                    id: "user_002",
+                    username: "maria.gerente",
+                    email: "maria.gerente@gralha.dev",
+                    full_name: "Maria Gerente",
+                    role: "manager",
+                    created_at: "2026-01-01T10:00:00Z"
+                }
+            ]
+        };
+
+        // Regras de validação por tipo de recurso
+        const validationRules = {
+            clients: {
+                required: ['id', 'name', 'email', 'phone'],
+                types: { id: 'string', name: 'string', email: 'string', phone: 'string' },
+                patterns: { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, phone: /^\d{10,11}$/ }
+            },
+            properties: {
+                required: ['id', 'address', 'city', 'state', 'type', 'area', 'price'],
+                types: { id: 'string', address: 'string', city: 'string', state: 'string', type: 'string', area: 'number', price: 'number' }
+            },
+            deals: {
+                required: ['id', 'client_id', 'property_id', 'user_id', 'status', 'value'],
+                types: { id: 'string', client_id: 'string', property_id: 'string', user_id: 'string', status: 'string', value: 'number' }
+            },
+            users: {
+                required: ['id', 'username', 'email', 'full_name', 'role'],
+                types: { id: 'string', username: 'string', email: 'string', full_name: 'string', role: 'string' }
+            }
+        };
+
+        // Regras de homogenização
+        const homogenizationRules = {
+            clients: {
+                normalizePhone: (phone) => phone.replace(/\D/g, ''),
+                normalizeEmail: (email) => email.toLowerCase().trim(),
+                normalizeOrigin: (origin) => {
+                    const map = {
+                        'google': 'Google Ads',
+                        'meta': 'Meta Ads',
+                        'zap': 'Zap Imóveis',
+                        'indicacao': 'Indicação',
+                        'direto': 'Direto'
+                    };
+                    const key = origin.toLowerCase().split(' ')[0];
+                    return map[key] || origin;
+                }
+            },
+            properties: {
+                normalizeType: (type) => {
+                    const map = {
+                        'apt': 'Apartamento',
+                        'casa': 'Casa',
+                        'lote': 'Lote',
+                        'comercial': 'Comercial'
+                    };
+                    return map[type.toLowerCase()] || type;
+                },
+                normalizeState: (state) => state.toUpperCase()
+            },
+            deals: {
+                normalizeStatus: (status) => {
+                    const map = {
+                        'lead': 'Lead',
+                        'negociacao': 'Em Negociação',
+                        'proposta': 'Proposta Enviada',
+                        'contrato': 'Contrato Assinado',
+                        'fechado': 'Fechado'
+                    };
+                    const key = status.toLowerCase().replace(/\s+/g, '');
+                    return map[key] || status;
+                }
+            }
+        };
+
+        function loadTemplate() {
+            const resourceType = document.getElementById('resourceType').value;
+            const template = templates[resourceType];
+            document.getElementById('payloadInput').value = JSON.stringify(template, null, 2);
+        }
+
+        function updateTemplate() {
+            loadTemplate();
+        }
+
+        function clearInput() {
+            document.getElementById('payloadInput').value = '';
+            document.getElementById('exportOutput').value = '';
+            document.getElementById('statsResults').innerHTML = '';
+            document.getElementById('validationResults').innerHTML = '';
+            document.getElementById('homogenizationResults').innerHTML = '';
+        }
+
+        function validatePayload() {
+            const resourceType = document.getElementById('resourceType').value;
+            const payloadText = document.getElementById('payloadInput').value;
+            const rules = validationRules[resourceType];
+            const validationResults = document.getElementById('validationResults');
+            validationResults.innerHTML = '';
+
+            try {
+                const data = JSON.parse(payloadText);
+                const records = Array.isArray(data) ? data : [data];
+                let validCount = 0;
+                let invalidCount = 0;
+                let warnings = [];
+
+                records.forEach((record, index) => {
+                    let recordValid = true;
+                    const recordErrors = [];
+
+                    // Verificar campos obrigatórios
+                    rules.required.forEach(field => {
+                        if (!record[field]) {
+                            recordErrors.push(`❌ Campo obrigatório ausente: ${field}`);
+                            recordValid = false;
+                        }
+                    });
+
+                    // Verificar tipos
+                    Object.entries(rules.types).forEach(([field, expectedType]) => {
+                        if (record[field] !== undefined) {
+                            const actualType = typeof record[field];
+                            if (actualType !== expectedType) {
+                                recordErrors.push(`⚠️ Campo ${field}: esperado ${expectedType}, recebido ${actualType}`);
+                                warnings.push(`Registro ${index}: tipo incorreto em ${field}`);
+                            }
+                        }
+                    });
+
+                    // Verificar padrões
+                    if (rules.patterns) {
+                        Object.entries(rules.patterns).forEach(([field, pattern]) => {
+                            if (record[field] && !pattern.test(record[field])) {
+                                recordErrors.push(`⚠️ Campo ${field}: formato inválido (${record[field]})`);
+                                warnings.push(`Registro ${index}: formato inválido em ${field}`);
+                            }
+                        });
+                    }
+
+                    if (recordValid && recordErrors.length === 0) {
+                        validCount++;
+                    } else {
+                        invalidCount++;
+                    }
+
+                    // Exibir resultado do registro
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `result-item ${recordErrors.length > 0 ? 'error' : 'success'}`;
+                    resultDiv.innerHTML = `
+                        <div class="result-label">Registro ${index + 1}</div>
+                        <div class="result-value">
+                            ${recordErrors.length > 0 ? recordErrors.join('<br>') : '✅ Válido'}
+                        </div>
+                    `;
+                    validationResults.appendChild(resultDiv);
+                });
+
+                // Resumo
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'result-item success';
+                summaryDiv.innerHTML = `
+                    <div class="result-label">📊 Resumo de Validação</div>
+                    <div class="result-value">
+                        Total: ${records.length} | Válidos: ${validCount} | Inválidos: ${invalidCount}
+                    </div>
+                `;
+                validationResults.insertBefore(summaryDiv, validationResults.firstChild);
+
+            } catch (error) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'result-item error';
+                errorDiv.innerHTML = `
+                    <div class="result-label">❌ Erro ao Analisar JSON</div>
+                    <div class="result-value">${error.message}</div>
+                `;
+                validationResults.appendChild(errorDiv);
+            }
+        }
+
+        function analyzeData() {
+            const resourceType = document.getElementById('resourceType').value;
+            const payloadText = document.getElementById('payloadInput').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const statsResults = document.getElementById('statsResults');
+            const homogenizationResults = document.getElementById('homogenizationResults');
+            statsResults.innerHTML = '';
+            homogenizationResults.innerHTML = '';
+
+            try {
+                const data = JSON.parse(payloadText);
+                const records = Array.isArray(data) ? data : [data];
+
+                // Filtrar por período
+                let filteredRecords = records;
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    filteredRecords = records.filter(r => {
+                        const date = new Date(r.created_at || r.date_signed || '');
+                        return date >= start && date <= end;
+                    });
+                }
+
+                // Atualizar estatísticas
+                document.getElementById('totalRecords').textContent = records.length;
+                document.getElementById('validRecords').textContent = filteredRecords.length;
+                document.getElementById('invalidRecords').textContent = records.length - filteredRecords.length;
+                document.getElementById('warningRecords').textContent = '0';
+
+                // Análise por tipo
+                let analysis = '';
+                if (resourceType === 'clients') {
+                    const origins = {};
+                    filteredRecords.forEach(r => {
+                        origins[r.origin] = (origins[r.origin] || 0) + 1;
+                    });
+                    analysis = `
+                        <strong>Clientes por Origem:</strong><br>
+                        ${Object.entries(origins).map(([origin, count]) => `${origin}: ${count}`).join('<br>')}
+                    `;
+                } else if (resourceType === 'properties') {
+                    const types = {};
+                    filteredRecords.forEach(r => {
+                        types[r.type] = (types[r.type] || 0) + 1;
+                    });
+                    const totalArea = filteredRecords.reduce((sum, r) => sum + (r.area || 0), 0);
+                    const avgPrice = filteredRecords.reduce((sum, r) => sum + (r.price || 0), 0) / filteredRecords.length;
+                    analysis = `
+                        <strong>Imóveis por Tipo:</strong><br>
+                        ${Object.entries(types).map(([type, count]) => `${type}: ${count}`).join('<br>')}<br><br>
+                        <strong>Estatísticas:</strong><br>
+                        Área Total: ${totalArea.toFixed(2)} m²<br>
+                        Preço Médio: R$ ${avgPrice.toFixed(2)}
+                    `;
+                } else if (resourceType === 'deals') {
+                    const statuses = {};
+                    let totalValue = 0;
+                    filteredRecords.forEach(r => {
+                        statuses[r.status] = (statuses[r.status] || 0) + 1;
+                        totalValue += r.value || 0;
+                    });
+                    analysis = `
+                        <strong>Negócios por Status:</strong><br>
+                        ${Object.entries(statuses).map(([status, count]) => `${status}: ${count}`).join('<br>')}<br><br>
+                        <strong>VGV Total: R$ ${totalValue.toFixed(2)}</strong>
+                    `;
+                }
+
+                const analysisDiv = document.createElement('div');
+                analysisDiv.className = 'result-item success';
+                analysisDiv.innerHTML = `<div class="result-value">${analysis}</div>`;
+                statsResults.appendChild(analysisDiv);
+
+                // Homogenização
+                homogenizeData(filteredRecords, resourceType, homogenizationResults);
+
+            } catch (error) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'result-item error';
+                errorDiv.innerHTML = `<div class="result-label">❌ Erro: ${error.message}</div>`;
+                statsResults.appendChild(errorDiv);
+            }
+        }
+
+        function homogenizeData(records, resourceType, resultsDiv) {
+            const rules = homogenizationRules[resourceType] || {};
+            const homogenized = records.map(record => {
+                const normalized = { ...record };
+
+                // Aplicar regras de normalização
+                Object.entries(rules).forEach(([ruleName, ruleFunc]) => {
+                    const fieldName = ruleName.replace('normalize', '').toLowerCase();
+                    if (normalized[fieldName]) {
+                        normalized[fieldName] = ruleFunc(normalized[fieldName]);
+                    }
+                });
+
+                return normalized;
+            });
+
+            // Exibir resultado
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-item success';
+            resultDiv.innerHTML = `
+                <div class="result-label">✅ Dados Homogenizados</div>
+                <div class="result-value">
+                    ${homogenized.length} registros processados<br>
+                    Regras aplicadas: ${Object.keys(rules).length}
+                </div>
+            `;
+            resultsDiv.appendChild(resultDiv);
+
+            // Salvar para exportação
+            document.getElementById('exportOutput').value = JSON.stringify(homogenized, null, 2);
+        }
+
+        function switchTab(tabName) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Mostrar aba selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function downloadJSON() {
+            const data = document.getElementById('exportOutput').value;
+            if (!data) {
+                alert('Nenhum dado para exportar');
+                return;
+            }
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dados_homogenizados_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function copyToClipboard() {
+            const textarea = document.getElementById('exportOutput');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Dados copiados para a área de transferência');
+        }
+
+        // Inicializar
+        window.addEventListener('load', () => {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('startDate').valueAsDate = firstDay;
+            document.getElementById('endDate').valueAsDate = today;
+            loadTemplate();
+        });
+    </script>
+</body>
+</html>
